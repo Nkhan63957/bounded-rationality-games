@@ -1,1 +1,3 @@
 date,experiment_id,game,n_players,p_value,agent_type,lr,timesteps,reward_type,mean_submission,implied_level,notes,status 
+2026-05-31,EXP001,p_beauty_contest,5,0.6666666666666666,PPO,0.0003,50000,winner_take_all,7.1241,4.8057,Baseline failure condition — sparse reward expected,COMPLETE
+2026-05-31,EXP002,p_beauty_contest,5,0.6666666666666666,PPO,0.0003,200000,proximity,16.5571,2.7258,Dense reward — primary training condition,COMPLETE

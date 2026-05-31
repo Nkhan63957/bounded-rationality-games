@@ -44,3 +44,38 @@ N/A — clean first implementation.
 Train PPO agent with winner_take_all reward first (expected
 failure — reward too sparse). Document the failure, then
 switch to proximity reward.
+
+## Session 003 — 2026-05-31
+
+**What I tried:**
+EXP001: winner_take_all reward, 50k timesteps.
+EXP002: proximity reward, 200k timesteps.
+Both: 5 players, p=2/3, mixed opponent population.
+
+**What happened:**
+EXP001: Agent did NOT produce flat curve as predicted.
+Instead converged to mean submission ~7.1, implied level 4.8.
+Overshooting toward Nash rather than finding human equilibrium.
+Failure mode: wrong direction, not no learning.
+
+EXP002: Clean convergence. Stabilized at implied level 2.726
+after ~150k steps. Nagel human benchmark: 1.8.
+Gap of 0.926 levels above human mean.
+
+**Hypothesis for why:**
+EXP001: Winner-take-all with mixed opponents rewards
+submitting just below the opponent cluster. Agent learned
+to undercut opponents rather than model human reasoning depth.
+Correct optimization, wrong objective.
+
+EXP002: Proximity reward produces correct learning direction.
+Gap vs Nagel (2.726 vs 1.8) likely reflects training regime
+difference — RL agent has 200k rounds of feedback vs human
+subjects who played once. Extensive experience produces
+slightly deeper reasoning than one-shot human play.
+
+**Next step:**
+Run EXP002 longer (500k steps) to see if level continues
+descending toward 1.8 or has genuinely stabilized at 2.7.
+Also need to test whether the gap closes when opponent
+population is fixed at level-1 only (simpler target).
