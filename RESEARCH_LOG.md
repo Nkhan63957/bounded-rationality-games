@@ -102,3 +102,37 @@ Design EXP004 — vary p value (try p=0.5 and p=0.9) to test
 whether reasoning depth scales with p as theory predicts.
 Or move to multi-agent version where agents play against
 each other rather than fixed opponents.
+
+## Session 005 — 2026-05-31
+
+**What I tried:**
+EXP004: proximity reward, p=0.5, mixed opponents, 200k steps.
+EXP005: proximity reward, p=0.9, mixed opponents, 200k steps.
+Testing whether implied reasoning depth scales with p as
+level-k theory predicts.
+
+**What happened:**
+EXP004 (p=0.5): Converged to implied level 2.530.
+Almost identical to EXP002 (p=2/3, level 2.726).
+Raw submission dropped from 16.6 to 8.7 — correct direction.
+Implied level roughly invariant to p — consistent with theory.
+
+EXP005 (p=0.9): Did NOT converge. Stuck at level 10 until
+step 170k, then slowly descending. Final level 8.297 at 200k,
+curve still declining. Model moved to experiments/failed/.
+
+**Hypothesis for why:**
+EXP004: Level-k reasoning depth is a property of the agent,
+not the game parameter. Agent adjusts submission proportionally
+to p while maintaining same reasoning depth. Confirms agent
+has learned the underlying level-k structure.
+
+EXP005: With p=0.9, level-k submissions cluster near 50
+(L1=45, L2=40.5, L3=36.5). Proximity reward gradient is
+nearly flat across this region — weak learning signal.
+Convergence time scales with p. Need 500k steps minimum.
+
+**Next step:**
+EXP005b: Run p=0.9 to 500k steps to find true plateau.
+Also move EXP005 to experiments/failed/ as documented
+non-convergence.

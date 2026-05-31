@@ -56,6 +56,36 @@ EXPERIMENTS = [
         "timesteps":     200_000,
         "note":          "Fixed Level-1 opponents — does gap to Nagel close?",
     },
+    {
+        "id":            "EXP004",
+        "reward_type":   "proximity",
+        "opponent_type": "mixed",
+        "n_players":     5,
+        "p":             0.5,
+        "lr":            3e-4,
+        "timesteps":     200_000,
+        "note":          "p=0.5 — does reasoning depth increase as theory predicts?",
+    },
+    {
+        "id":            "EXP005",
+        "reward_type":   "proximity",
+        "opponent_type": "mixed",
+        "n_players":     5,
+        "p":             0.9,
+        "lr":            3e-4,
+        "timesteps":     200_000,
+        "note":          "p=0.9 — does reasoning depth decrease as theory predicts?",
+    },
+    {
+        "id":            "EXP005b",
+        "reward_type":   "proximity",
+        "opponent_type": "mixed",
+        "n_players":     5,
+        "p":             0.9,
+        "lr":            3e-4,
+        "timesteps":     500_000,
+        "note":          "p=0.9 extended — EXP005 had not converged at 200k",
+    },
 ]
 
 # ── Callback to track training ────────────────────────────────────────────────
@@ -258,7 +288,10 @@ if __name__ == "__main__":
     # results["EXP002"] = run_experiment(EXPERIMENTS[1])
 
     # Run EXP003 — fixed level-1 opponents
-    results["EXP003"] = run_experiment(EXPERIMENTS[2])
+    # results["EXP003"] = run_experiment(EXPERIMENTS[2])
+    # results["EXP004"] = run_experiment(EXPERIMENTS[3])
+    # results["EXP005"] = run_experiment(EXPERIMENTS[4])
+    results["EXP005b"] = run_experiment(EXPERIMENTS[5])
 
     # ── Comparison summary ────────────────────────────────────────────────────
     print(f"\n{'='*60}")

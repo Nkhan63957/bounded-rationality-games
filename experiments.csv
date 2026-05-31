@@ -2,3 +2,5 @@ date,experiment_id,game,n_players,p_value,agent_type,lr,timesteps,reward_type,me
 2026-05-31,EXP001,p_beauty_contest,5,0.6666666666666666,PPO,0.0003,50000,winner_take_all,7.1241,4.8057,Baseline failure condition — sparse reward expected,COMPLETE
 2026-05-31,EXP002,p_beauty_contest,5,0.6666666666666666,PPO,0.0003,200000,proximity,16.5571,2.7258,Dense reward — primary training condition,COMPLETE
 2026-05-31,EXP003,p_beauty_contest,5,0.6666666666666666,PPO,0.0003,200000,proximity,20.4808,2.2013,Fixed Level-1 opponents — does gap to Nagel close?,COMPLETE
+2026-05-31,EXP004,p_beauty_contest,5,0.5,PPO,0.0003,200000,proximity,8.6541,2.5305,p=0.5 — does reasoning depth increase as theory predicts?,COMPLETE
+2026-05-31,EXP005,p_beauty_contest,5,0.9,PPO,0.0003,200000,proximity,20.8608,8.2968,p=0.9 — does reasoning depth decrease as theory predicts?,COMPLETE
