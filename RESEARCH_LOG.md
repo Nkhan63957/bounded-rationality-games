@@ -79,3 +79,26 @@ Run EXP002 longer (500k steps) to see if level continues
 descending toward 1.8 or has genuinely stabilized at 2.7.
 Also need to test whether the gap closes when opponent
 population is fixed at level-1 only (simpler target).
+
+## Session 004 — 2026-05-31
+
+**What I tried:**
+EXP003: proximity reward, fixed Level-1 opponents, 200k steps.
+
+**What happened:**
+Converged to implied level 2.201 (vs 2.726 with mixed opponents).
+Gap to Nagel partially closed: 0.926 → 0.401.
+Near-perfect reward (99.97/100). Clean plateau from step 120k.
+
+**Hypothesis for why:**
+Gap decomposition:
+- Population effect: ~0.5 levels (mixed vs fixed L1 opponents)
+- Training regime effect: ~0.4 levels (200k rounds vs one-shot
+  human experiment)
+Total gap to Nagel: 0.401 levels with simplest opponent type.
+
+**Next step:**
+Design EXP004 — vary p value (try p=0.5 and p=0.9) to test
+whether reasoning depth scales with p as theory predicts.
+Or move to multi-agent version where agents play against
+each other rather than fixed opponents.

@@ -4,6 +4,7 @@ Beauty Contest PPO Training Script
 Experiment 001: Winner-take-all reward (expected failure)
 Experiment 002: Proximity reward (expected to work)
 
+
 Each experiment logs to experiments.csv and saves training
 curves to docs/screenshots/ for the Maker Portfolio.
 
@@ -44,6 +45,16 @@ EXPERIMENTS = [
         "lr":            3e-4,
         "timesteps":     200_000,
         "note":          "Dense reward — primary training condition",
+    },
+    {
+        "id":            "EXP003",
+        "reward_type":   "proximity",
+        "opponent_type": "level1",
+        "n_players":     5,
+        "p":             2/3,
+        "lr":            3e-4,
+        "timesteps":     200_000,
+        "note":          "Fixed Level-1 opponents — does gap to Nagel close?",
     },
 ]
 
@@ -235,16 +246,19 @@ if __name__ == "__main__":
     # Winner-take-all reward is too sparse for early learning.
     # Agent wins <5% of rounds during initial exploration.
     # Expected: flat training curve, no convergence.
-    results["EXP001"] = run_experiment(EXPERIMENTS[0])
+    # results["EXP001"] = run_experiment(EXPERIMENTS[0])
 
-    print(f"\n{'='*60}")
-    print("  EXP001 complete. Check training curve before proceeding.")
-    print(f"  Expected: flat reward curve (sparse signal failure)")
-    print(f"  If curve is flat → proceed to EXP002 (proximity reward)")
-    print(f"{'='*60}\n")
+    # print(f"\n{'='*60}")
+    # print("  EXP001 complete. Check training curve before proceeding.")
+    # print(f"  Expected: flat reward curve (sparse signal failure)")
+    # print(f"  If curve is flat → proceed to EXP002 (proximity reward)")
+    # print(f"{'='*60}\n")
 
     # Run EXP002 — proximity reward
-    results["EXP002"] = run_experiment(EXPERIMENTS[1])
+    # results["EXP002"] = run_experiment(EXPERIMENTS[1])
+
+    # Run EXP003 — fixed level-1 opponents
+    results["EXP003"] = run_experiment(EXPERIMENTS[2])
 
     # ── Comparison summary ────────────────────────────────────────────────────
     print(f"\n{'='*60}")
