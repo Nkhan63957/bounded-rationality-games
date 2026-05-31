@@ -136,3 +136,30 @@ Convergence time scales with p. Need 500k steps minimum.
 EXP005b: Run p=0.9 to 500k steps to find true plateau.
 Also move EXP005 to experiments/failed/ as documented
 non-convergence.
+
+## Session 006 — 2026-05-31
+
+**What I tried:**
+EXP005b: p=0.9, proximity reward, 500k steps.
+Extended from EXP005 which had not converged at 200k.
+
+**What happened:**
+Converged to implied level 2.814 at approximately step 330k.
+Final mean submission 37.172 — correctly scaled for p=0.9.
+Plateau confirmed from step 330k through 500k.
+
+**Key finding — p-invariance confirmed:**
+p=0.5 → 2.530, p=2/3 → 2.726, p=0.9 → 2.814.
+Implied level approximately invariant to p.
+Consistent with level-k theory prediction.
+
+**Secondary finding — convergence scaling:**
+Convergence steps: p=0.5 (~100k), p=2/3 (~150k), p=0.9 (~330k).
+Higher p = flatter reward landscape = slower convergence.
+
+**Beauty contest experiment battery complete.**
+All five experiments done. Three publishable findings.
+
+**Next session (June 1):**
+Multi-agent beauty contest design — agents play
+against each other rather than fixed opponents.
