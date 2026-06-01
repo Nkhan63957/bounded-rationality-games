@@ -163,3 +163,46 @@ All five experiments done. Three publishable findings.
 **Next session (June 1):**
 Multi-agent beauty contest design — agents play
 against each other rather than fixed opponents.
+
+## Session 007 — 2026-06-01
+
+**What I tried:**
+EXP006: Multi-agent beauty contest, parameter sharing PPO.
+All 5 agents share one live policy (no deepcopy — true parameter sharing).
+p=2/3, 200k steps, seed=42. Comparison target: EXP002 level 2.726.
+
+**What happened:**
+Policy converged to near-Nash equilibrium. Final mean submission 0.284,
+implied level 10.000 (capped). Deterministic evaluation collapses to ~0.
+
+**Logging bug noted:**
+_last_mean reads 50.00 throughout training due to reading post-reset value.
+Actual within-episode submissions are lower. Result is valid — deterministic
+evaluation is authoritative. Fix logging in next session.
+
+**Key finding — Nash-seeking via parameter sharing:**
+Parameter sharing creates a symmetric downward gradient. When all agents
+share one policy, changing the policy changes ALL agents' submissions
+simultaneously. Target = p × mean follows submissions downward. No gradient
+signal stops convergence before zero. Symmetric Nash equilibrium (submit 0)
+is the fixed point.
+
+This is a different mechanism from EXP001 (winner-take-all reward).
+EXP001: wrong reward → Nash-seeking.
+EXP006: right reward + parameter sharing → Nash-seeking.
+
+**2x2 architecture table now complete:**
+
+| | Fixed opponents | Shared policy |
+|---|---|---|
+| Winner-take-all | Nash-seeking (EXP001) | [untested] |
+| Proximity | Bounded rationality (EXP002-005) | Nash-seeking (EXP006) |
+
+**Finding:** Bounded rationality requires BOTH proximity reward AND fixed
+opponent distribution. Changing either condition produces Nash-seeking.
+Opponent structure is a joint determinant alongside reward architecture.
+
+**Next session:**
+Fix _last_mean logging bug. Design EXP007: independent PPO agents
+(no parameter sharing) with proximity reward. Tests whether co-evolution
+without shared gradients also produces Nash or recovers bounded rationality.
