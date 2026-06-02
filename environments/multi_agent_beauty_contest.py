@@ -83,9 +83,24 @@ class MultiAgentBeautyContestEnv(gym.Env):
     def _opponent_actions(self):
         obs = self._get_obs().reshape(1, -1)
         actions = []
+    
+        # Use frozen weights if available, otherwise live model
+        policy = self.model
+        if hasattr(self, 'frozen_state_dict') and self.frozen_state_dict is not None:
+            import torch, io, copy
+            if not hasattr(self, '_frozen_model') or self._frozen_model is None:
+                import torch, io
+                self._frozen_model = PPO("MlpPolicy", self)
+                self._frozen_model.policy.load_state_dict(self.model.policy.state_dict())
+            self.frozen_state_dict.seek(0)
+            self._frozen_model.policy.load_state_dict(
+                torch.load(self.frozen_state_dict))
+            self.frozen_state_dict.seek(0)
+            policy = self._frozen_model
+    
         for _ in range(self.n_agents - 1):
-            if self.model is not None:
-                action, _ = self.model.predict(obs, deterministic=False)
+            if policy is not None:
+                action, _ = policy.predict(obs, deterministic=False)
                 sub = float(np.clip(action[0][0], 0.0, 100.0))
             else:
                 sub = float(np.random.uniform(0, 100))
@@ -137,7 +152,8 @@ class TrainingCallback(BaseCallback):
     def _on_step(self):
         if self.num_timesteps - self._last_log >= self.log_interval:
             self._last_log = self.num_timesteps
-            mean_sub = self.env._last_mean
+            infos = self.locals.get("infos", [{}])
+            mean_sub = infos[0].get("mean_sub", self.env._last_mean) if infos else self.env._last_mean
             level = implied_level(mean_sub, self.p)
             rewards = self.locals.get("rewards", [0.0])
             mean_reward = float(np.mean(rewards)) if len(rewards) > 0 else 0.0
@@ -164,6 +180,29 @@ class TrainingCallback(BaseCallback):
 
 
 # ── Training Entry Point ───────────────────────────────────────────────────
+
+class FrozenOpponentCallback(BaseCallback):
+    """Update opponent weights every N rollouts instead of real-time."""
+    def __init__(self, env, sync_every_n_rollouts=5, verbose=0):
+        super().__init__(verbose)
+        self.env = env
+        self.sync_every = sync_every_n_rollouts
+        self._rollout_count = 0
+    
+    def _on_step(self) -> bool:
+        return True
+
+    def _on_rollout_end(self):
+        self._rollout_count += 1
+        if self._rollout_count % self.sync_every == 0:
+            import torch, io
+            buf = io.BytesIO()
+            torch.save(self.model.policy.state_dict(), buf)
+            buf.seek(0)
+            self.env.frozen_state_dict = buf
+            if self.verbose > 0:
+                print(f"  [frozen sync] step {self.num_timesteps:,}")
+        return True
 
 def run_exp006(
     total_timesteps=200_000,
@@ -251,13 +290,94 @@ def run_exp006(
         "final_reward": final_reward,
     }
 
+def run_exp007(
+    total_timesteps=200_000,
+    p=2/3,
+    n_agents=5,
+    seed=42,
+    log_interval=2000,
+    save_dir="experiments/working",
+    sync_every=5,
+):
+    print("=" * 60)
+    print("  EXP007: Multi-agent — frozen opponents (sync every N rollouts)")
+    print(f"  p={p:.4f} | n_agents={n_agents} | sync_every={sync_every}")
+    print(f"  Hypothesis: frozen opponents break Nash, produce bounded rationality")
+    print("=" * 60)
+
+    os.makedirs(save_dir, exist_ok=True)
+    timestamp = time.strftime("%Y%m%d")
+    csv_path = os.path.join(save_dir, f"EXP007_log_{timestamp}.csv")
+    model_path = os.path.join(save_dir, "EXP007_ppo_frozen_opponents")
+
+    env = MultiAgentBeautyContestEnv(n_agents=n_agents, p=p)
+
+    model = PPO(
+        policy="MlpPolicy", env=env,
+        learning_rate=3e-4, n_steps=2048, batch_size=64,
+        n_epochs=10, gamma=0.99, gae_lambda=0.95,
+        clip_range=0.2, verbose=0, seed=seed,
+    )
+
+    env.model = model
+    env.frozen_state_dict = None
+
+    train_callback = TrainingCallback(
+        env=env, p=p, log_interval=log_interval, csv_path=csv_path)
+    frozen_callback = FrozenOpponentCallback(
+        env=env, sync_every_n_rollouts=sync_every)
+
+    from stable_baselines3.common.callbacks import CallbackList
+    callbacks = CallbackList([train_callback, frozen_callback])
+
+    print(f"\n  Training started\n")
+    start = time.time()
+    model.learn(total_timesteps=total_timesteps, callback=callbacks)
+    elapsed = time.time() - start
+    print(f"\n  Training complete in {elapsed/60:.1f} minutes")
+
+    # Final evaluation
+    obs, _ = env.reset()
+    mean_subs, rewards_eval = [], []
+    for _ in range(500):
+        action, _ = model.predict(obs, deterministic=True)
+        obs, reward, terminated, truncated, info = env.step(action)
+        mean_subs.append(info["mean_sub"])
+        rewards_eval.append(reward)
+        if terminated or truncated:
+            obs, _ = env.reset()
+
+    final_mean_sub = float(np.mean(mean_subs))
+    final_level = implied_level(final_mean_sub, p)
+    final_reward = float(np.mean(rewards_eval))
+
+    model.save(model_path)
+
+    print("\n" + "=" * 60)
+    print("  EXPERIMENT COMPARISON")
+    print("=" * 60)
+    print(f"  {'Experiment':<16} {'Opponents':<22} {'Mean Sub':>9} {'Impl Level':>11}")
+    print(f"  {'-'*60}")
+    print(f"  {'EXP007':<16} {'Frozen (sync=5)':<22} {final_mean_sub:>9.3f} {final_level:>11.3f}")
+    print(f"  {'EXP006':<16} {'Live shared':<22} {'0.284':>9} {'10.000':>11}")
+    print(f"  {'EXP002':<16} {'Fixed mixed':<22} {'16.610':>9} {'2.726':>11}")
+    print(f"  {'Nagel (1995)':<16} {'Human':<22} {'~24.9':>9} {'~1.8':>11}")
+    print("=" * 60)
+    print(f"\n  Final mean submission : {final_mean_sub:.3f}")
+    print(f"  Final implied level   : {final_level:.3f}")
+
+    return {
+        "final_mean_sub": final_mean_sub,
+        "final_implied_level": final_level,
+        "final_reward": final_reward,
+    }
+
 
 if __name__ == "__main__":
-    run_exp006(
+    run_exp007(
         total_timesteps=200_000,
-        p=2/3,
-        n_agents=5,
-        seed=42,
+        p=2/3, n_agents=5, seed=42,
         log_interval=2000,
         save_dir="experiments/working",
+        sync_every=5,
     )

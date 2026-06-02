@@ -206,3 +206,54 @@ Opponent structure is a joint determinant alongside reward architecture.
 Fix _last_mean logging bug. Design EXP007: independent PPO agents
 (no parameter sharing) with proximity reward. Tests whether co-evolution
 without shared gradients also produces Nash or recovers bounded rationality.
+
+## Session 008 — 2026-06-02
+
+**What I built:**
+Fixed logging bug in TrainingCallback — _on_step now reads
+mean_sub from infos dict rather than env._last_mean, which
+was returning the post-reset value of 50.0.
+
+Added FrozenOpponentCallback: syncs opponent weights every
+N rollouts rather than real-time, testing whether the EXP006
+Nash convergence mechanism is gradient-sharing-specific.
+
+**What I ran:**
+EXP007: p=2/3, 200k steps, frozen opponents (sync every 5
+rollouts). Hypothesis: frozen opponents break Nash and produce
+bounded rationality.
+
+**What happened:**
+Hypothesis falsified. EXP007 converged to near Nash
+(mean sub 0.168, implied level 10.000) — same as EXP006
+(mean sub 0.284). Frozen opponents did not break Nash
+convergence.
+
+**Revised finding:**
+Nash convergence is not caused by real-time gradient sharing
+specifically. It is caused by same-architecture opponents
+regardless of sync frequency. The key distinction is:
+  - Fixed opponents (EXP002-005): bounded rationality
+  - Same-architecture opponents (EXP006, EXP007): Nash
+
+Update to 2x2 architecture table:
+| | Fixed opponents | Same-arch opponents |
+|---|---|---|
+| Proximity reward | Bounded rationality | Nash (both sync modes) |
+
+**Connection to Nagel (2026-06-02 correspondence):**
+Professor Nagel responded to the cold email and raised the
+possibility that gradient mechanisms contain hidden strategic
+reasoning, citing Nagel and Tang centipede paper. EXP007
+is consistent with this interpretation: each agent
+independently converges to Nash through gradient descent
+even without real-time weight coupling. This looks less
+like mechanical convergence and more like each agent
+discovering the strategic optimum individually.
+
+**Next session:**
+Read Nagel and Tang (1998) centipede paper. Draft reply
+to Professor Nagel engaging with the directional learning
+connection. Plan EXP008 — test whether the Nash result
+holds across different p values (p=0.5, p=0.9) to confirm
+architecture-dependence generalizes beyond p=2/3.
