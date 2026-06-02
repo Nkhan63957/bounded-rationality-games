@@ -1,5 +1,23 @@
 # MAKOTO — Bounded Rationality Games
 ## Architectural Decisions
+
+## Observation Space — Single-Agent vs Multi-Agent
+
+**Decision:** Single-agent environment (beauty_contest.py) uses
+a 4-feature observation [own_last_submission, last_mean,
+last_target, round_progress]. Multi-agent environment
+(multi_agent_beauty_contest.py) uses 3 features [last_mean,
+last_target, round_progress], omitting own_last_submission.
+
+**Rationale:** In the single-agent setting, the agent's own
+previous submission carries information about its reasoning
+trajectory that is not fully captured by the mean (which is
+dominated by 4 fixed opponents). In the multi-agent setting,
+the agent's own submission is implicitly reflected in the mean
+since all 5 agents use the same policy — the mean already
+encodes the agent's own behavior. The additional feature would
+be redundant.
+
 ### Decision 001 — 2026-05-31
 
 **What:** Proximity reward instead of winner-take-all as primary
