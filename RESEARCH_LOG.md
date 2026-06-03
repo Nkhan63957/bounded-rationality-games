@@ -322,3 +322,25 @@ Build rule-based regular player logic so games last
 multiple rounds. Rule-based regulars: infer own symbol
 from neighborhood, declare most confident symbol,
 update suspicion from inconsistent messages.
+
+## Session 011 — 2026-06-03
+
+**What I built:**
+agents/rule_based_regular.py:
+- Two-phase strategy (cooperative rounds 1-2, strategic 3+)
+- Declaration based on neighborhood-inferred own symbol belief
+- Alliance formation with nearest alive neighbor
+- Symbol sharing with allies (honest for rule-based)
+- Accusation of most suspicious player in phase 2
+
+**Results:**
+- Games now last full 100 rounds vs round 1-2 with random agents
+- 7 players surviving at round 100 (6 regular + Jack)
+- 2 alliances formed organically
+- Neither win condition triggered — balanced baseline confirmed
+
+**Next session:**
+Train PPO Jack agent vs rule-based regular players.
+This establishes Jack's baseline strategy before upgrading
+regulars to PPO. Key metrics to track: lobby wipe rate,
+rounds to win, Jack identification round, alliance survival.

@@ -100,7 +100,7 @@ class PlayerState:
         # Alliance tracking
         self.alliances: set = set()          # current allied player ids
         self.pending_offer: Optional[int] = None  # outgoing alliance offer
-        self.alliance_claims: dict = {}      # {player_id: claimed_symbol}
+        self.alliance_claims: dict = {}      # {informer_id: symbol_they_say_I_am}
         self.manipulation_counts: dict = {}  # Jack only: {target: times}
 
         # Beliefs
@@ -431,11 +431,16 @@ class JackOfHeartsEnv(gym.Env):
 
         # Message
         self.last_messages[self.agent_id] = (msg_type, msg_target)
-        if msg_type == 0:  # broadcast symbol claim
-            for p in self.players:
-                if p.alive and p.player_id != self.agent_id:
-                    if self.agent_id in p.alliances:
-                        p.alliance_claims[self.agent_id] = broadcast_sym
+        if msg_type == 0:
+            # Sender claims to see broadcast_sym on msg_target's collar
+            if msg_target != self.agent_id:
+                target = self.players[msg_target]
+                if target.alive:
+                    # Target records what sender said about their symbol
+                    target.alliance_claims[self.agent_id] = broadcast_sym
+                    # If allied, update target's own symbol belief
+                    if self.agent_id in target.alliances:
+                        target.update_own_belief(broadcast_sym, 0.15)
         self._update_suspicion_from_message(
             self.agent_id, msg_type, msg_target)
 

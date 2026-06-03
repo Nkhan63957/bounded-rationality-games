@@ -190,11 +190,13 @@ class GameCoordinator:
 
             # Within-alliance symbol claims (can lie)
             if msg_type == 0:
-                sender = env0.players[agent_id]
-                for ally_id in sender.alliances:
-                    if ally_id in self.alive_players:
-                        env0.players[ally_id].alliance_claims[
-                            agent_id] = broadcast
+                # Sender claims to see broadcast on msg_target's collar
+                if msg_target != agent_id:
+                    tgt_player = env0.players[msg_target]
+                    if tgt_player.alive:
+                        tgt_player.alliance_claims[agent_id] = broadcast
+                        if agent_id in tgt_player.alliances:
+                            tgt_player.update_own_belief(broadcast, 0.15)
 
             # Update suspicion for all players
             for p in env0.players:
@@ -307,7 +309,7 @@ class GameCoordinator:
         return {
             "outcome":          outcome,
             "round":            self.round,
-            "alive":            len(self.alive_players),
+            "alive":            len(self.alive_players),    
             "n_alive_regular":  n_alive_regular,
             "n_alliances":      n_alliances,
             "winner":           self.winner,
