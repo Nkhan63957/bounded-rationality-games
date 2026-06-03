@@ -257,3 +257,68 @@ to Professor Nagel engaging with the directional learning
 connection. Plan EXP008 — test whether the Nash result
 holds across different p values (p=0.5, p=0.9) to confirm
 architecture-dependence generalizes beyond p=2/3.
+
+## Session 009 — 2026-06-02
+
+**What I built:**
+Jack of Hearts environment (environments/jack_of_hearts.py):
+- 20 players, 1 Jack + 19 regular players
+- 4 suit symbols, asymmetric observation space (86-dim)
+- 5 message types with lying support
+- Jack always knows own symbol (mirror override)
+- Voluntary concession threshold at 0.85
+- Suspicion tracking with asymmetric visibility
+
+GameCoordinator (environments/game_coordinator.py):
+- Manages all 20 agents simultaneously
+- Phase 1: message processing + suspicion updates
+- Phase 2: Jack voluntary concession check
+- Phase 3: declaration processing + elimination
+- Phase 4: win condition checking
+- Phase 5: round advancement + state sync
+
+**Smoke tests:**
+- jack_of_hearts.py: obs shape (86,) confirmed
+- game_coordinator.py: 20 players, full episode runs cleanly
+- Random agents: Jack wins round 1 by lobby wipe (expected —
+  random declarations with 4 symbols means ~75% die per round)
+
+**Next session:**
+Build training script — Jack PPO agent vs rule-based regular
+players. Rule-based regulars: declare true symbol if known
+with >0.7 confidence, otherwise random. This establishes
+baseline Jack behavior before upgrading to full PPO regulars.
+
+## Session 010 — 2026-06-03
+
+**What I built:**
+Updated jack_of_hearts.py to v2:
+- 8-dimensional action space (uniform for all players)
+- Alliance mechanics: mutual offer formation, defection,
+  within-alliance symbol claims (lying permitted)
+- Diminishing returns manipulation (Jack only):
+  base effect 0.30, decay 0.60 per repeat
+- Neighborhood visibility: ring + random cross-links,
+  each player sees exactly 6 others
+- Own symbol belief updating from neighborhood observations
+- Observation space: 146-dim (Jack), includes alliance
+  mask, alliance claims, manipulation effectiveness
+
+Updated game_coordinator.py to v2:
+- 9-phase step: decode → concession → alliances →
+  manipulation → messages → declarations → belief update
+  → win conditions → advance round
+- Alliance survival bonus reward shaping
+- Full metrics tracking: lobby_wipes, jack_cornered,
+  jack_concessions, n_alliances
+
+**Smoke test:**
+- Jack obs shape: 146 confirmed
+- Full episode: Jack wins round 2, all mechanics running
+- Info dict producing research metrics correctly
+
+**Next session:**
+Build rule-based regular player logic so games last
+multiple rounds. Rule-based regulars: infer own symbol
+from neighborhood, declare most confident symbol,
+update suspicion from inconsistent messages.
