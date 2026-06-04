@@ -344,3 +344,36 @@ Train PPO Jack agent vs rule-based regular players.
 This establishes Jack's baseline strategy before upgrading
 regulars to PPO. Key metrics to track: lobby wipe rate,
 rounds to win, Jack identification round, alliance survival.
+
+## Session 012 — 2026-06-04
+
+**What I built:**
+train_jack.py — PPO training script for Jack agent
+vs rule-based regular players.
+
+Architecture:
+- JackTrainingEnv: wraps GameCoordinator for SB3
+  compatibility, one PPO step = one full game round
+- PPO: MlpPolicy 256x256 (larger than beauty contest
+  64x64 due to 146-dim observation space)
+- 500k timesteps, log every 5000 steps
+- RuleBasedRegular agents for all 19 regular players
+
+Metrics tracked per log interval:
+- Lobby wipe rate, cornered rate, concession rate
+- Average game duration (rounds)
+- Average alliances formed
+- Average episode reward
+
+Research question:
+What strategy does the Jack agent discover against
+rule-based regular players? Converges to active
+deception, passive blending, or mixed strategy?
+
+**Smoke test:** obs shape (146,) confirmed, step OK.
+
+**EXP-JH001 running:** 500k timesteps, seed 42.
+
+**Next session:**
+Analyze EXP-JH001 results. Document Jack's emergent
+strategy. Plan EXP-JH002 based on findings.
