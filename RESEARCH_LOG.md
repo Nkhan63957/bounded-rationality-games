@@ -377,3 +377,71 @@ deception, passive blending, or mixed strategy?
 **Next session:**
 Analyze EXP-JH001 results. Document Jack's emergent
 strategy. Plan EXP-JH002 based on findings.
+
+## Session 012 — 2026-06-04
+
+**What I built:**
+train_jack.py — PPO training script for Jack agent
+vs rule-based regular players (EXP-JH001).
+
+Architecture:
+- JackTrainingEnv: wraps GameCoordinator for SB3
+  compatibility, one PPO step = one full game round
+- PPO: MlpPolicy 256x256, 500k timesteps, seed 42
+- RuleBasedRegular agents for all 19 regular players
+- Metrics: wipe rate, cornered rate, concession rate,
+  avg rounds, avg alliances, avg reward
+
+**EXP-JH001 Results:**
+
+Training progression:
+- Steps 0-30k: learned not to concede immediately
+- Steps 30-150k: wipe rate climbed 0.13 → 0.62
+- Steps 150-350k: wipe rate hit 1.00 at steps 275k,
+  300k, 305k, 310k — lobby wipe every game in those
+  windows. Avg rounds dropped to 21-29. Reward 19-20.
+
+Final evaluation (100 games, deterministic):
+- Lobby wipe rate: 0.02
+- Jack cornered rate: 0.00
+- Concession rate: 0.00
+- Avg game duration: 196.0 rounds (hitting 200 cap)
+- Avg alliances: 0.88
+
+**Primary Finding — Stochastic/Deterministic Mismatch:**
+
+The wipe strategy achieved during training (0.50-1.00
+wipe rate) was stochastic — driven by PPO exploration
+noise, not encoded in the deterministic policy.
+
+Under deterministic evaluation, the Jack converges to
+indefinite survival: stays alive, avoids cornering,
+never concedes, never wipes. Games run to the 200-round
+cap with no winner.
+
+This is game-theoretically coherent: in an imperfect
+information social deduction game, a purely deterministic
+Jack strategy is exploitable. The Jack's optimal strategy
+requires stochasticity — consistent with the prediction
+that mixed strategies dominate under incomplete
+information. PPO's stochastic training policy was
+implementing the correct mixed strategy, but deterministic
+evaluation flattened it to a pure survival strategy.
+
+Connection to beauty contest findings: evaluation mode
+is a joint determinant of convergence behavior alongside
+reward architecture and opponent structure.
+
+**Bugs identified:**
+1. No episode length cap during training — agent can
+   exploit indefinite survival to accumulate reward
+2. Deterministic evaluation understates actual strategy
+   quality — stochastic evaluation needed
+
+**EXP-JH002 fixes:**
+1. Add 200-round cap to JackTrainingEnv.step()
+2. Evaluate with deterministic=False
+
+**Next session:**
+Implement fixes, run EXP-JH002, compare wipe rate
+under stochastic evaluation against EXP-JH001.
