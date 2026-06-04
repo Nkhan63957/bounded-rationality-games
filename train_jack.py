@@ -85,6 +85,16 @@ class JackTrainingEnv(JackOfHeartsEnv):
         One PPO step = one full game round.
         Jack uses PPO action, regulars use rule-based.
         """
+        # Cap episode length to prevent infinite stalling
+        if self._episode_rounds >= 200:
+            self.coord.done = True
+            return self._get_obs(), 0.0, True, False, {
+                "outcome": "max_rounds_reached",
+                "episode_rounds": self._episode_rounds,
+                "episode_reward": self._episode_reward,
+                "n_alliances": 0,
+            }
+
         if self.coord.done:
             obs, _ = self.reset()
             return obs, 0.0, True, False, self._last_info
