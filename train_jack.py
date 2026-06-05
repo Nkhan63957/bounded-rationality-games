@@ -266,14 +266,14 @@ class JackTrainingCallback(BaseCallback):
 
 # ── Training Entry Point ───────────────────────────────────────────────────
 
-def run_exp_jh001(
+def run_exp_jh003(
     total_timesteps: int = 500_000,
     seed: int = 42,
     log_interval: int = 5000,
     save_dir: str = "experiments/working",
 ):
     print("=" * 65)
-    print("  EXP-JH001: Jack PPO vs Rule-Based Regular Players")
+    print("  EXP-JH003: Jack PPO — Stochastic Evaluation as Primary Metric")
     print(f"  timesteps={total_timesteps:,} | seed={seed}")
     print(f"  Network: MlpPolicy 256x256")
     print(f"  Research question: What strategy does the Jack")
@@ -285,9 +285,9 @@ def run_exp_jh001(
 
     timestamp  = time.strftime("%Y%m%d")
     csv_path   = os.path.join(
-        save_dir, f"EXP_JH001_log_{timestamp}.csv")
+        save_dir, f"EXP_JH003_log_{timestamp}.csv")
     model_path = os.path.join(
-        save_dir, "EXP_JH001_jack_ppo")
+        save_dir, "EXP_JH003_jack_ppo")
 
     # Build environment
     env = JackTrainingEnv(seed=seed)
@@ -322,7 +322,7 @@ def run_exp_jh001(
     elapsed = time.time() - start
     print(f"\n  Training complete in {elapsed/60:.1f} minutes")
 
-    # Final evaluation — 100 games, deterministic
+    # Final evaluation — 100 games, stochastic
     print("\n  Running final evaluation (100 games)...")
     outcomes   = []
     durations  = []
@@ -333,7 +333,7 @@ def run_exp_jh001(
         game_done = False
         rounds = 0
         while not game_done and rounds < 200:
-            action, _ = model.predict(obs, deterministic=True)
+            action, _ = model.predict(obs, deterministic=False)
             obs, reward, terminated, truncated, info = env.step(action)
             game_done = terminated or truncated
             rounds += 1
@@ -352,7 +352,7 @@ def run_exp_jh001(
     model.save(model_path)
 
     print("\n" + "=" * 65)
-    print("  EXP-JH001 FINAL EVALUATION (100 games, deterministic)")
+    print("  EXP-JH003 FINAL EVALUATION (100 games, stochastic)")
     print("=" * 65)
     print(f"  Lobby wipe rate    : {wipe_rate:.2f}")
     print(f"  Jack cornered rate : {corner_rate:.2f}")
@@ -373,7 +373,7 @@ def run_exp_jh001(
 
 
 if __name__ == "__main__":
-    run_exp_jh001(
+    run_exp_jh003(
         total_timesteps=500_000,
         seed=42,
         log_interval=5000,

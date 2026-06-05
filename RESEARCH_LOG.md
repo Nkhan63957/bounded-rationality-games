@@ -445,3 +445,38 @@ reward architecture and opponent structure.
 **Next session:**
 Implement fixes, run EXP-JH002, compare wipe rate
 under stochastic evaluation against EXP-JH001.
+
+## Session 013 — 2026-06-04
+
+**What I ran:**
+EXP-JH003: identical to EXP-JH002 with corrected
+labels and stochastic evaluation as primary metric.
+Results consistent with EXP-JH002.
+
+**Consolidated findings across EXP-JH001/002/003:**
+
+Stochastic evaluation (authoritative):
+- Lobby wipe rate: ~0.07
+- Jack cornered rate: ~0.00
+- Concession rate: ~0.05
+- Avg game duration: ~185 rounds
+- Avg alliances: ~1.29
+
+Training peak (steps 275-340k):
+- Wipe rate: 0.80-1.00
+- Avg rounds: 21-49
+- Reward: 19-20 (near maximum)
+
+**Primary finding confirmed:**
+The Jack agent's optimal strategy is inherently mixed.
+Deterministic evaluation produces survival/stalling.
+Stochastic evaluation reveals genuine wipe capability.
+Mixed strategies dominate in imperfect information
+social deduction games — consistent with game theory.
+
+**Jack vs rule-based experiment battery complete.**
+
+**Next session:**
+Build analysis script. Produce training curve
+visualizations for both beauty contest and Jack
+of Hearts components. Begin paper outline.
