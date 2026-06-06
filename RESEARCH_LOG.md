@@ -479,4 +479,31 @@ social deduction games — consistent with game theory.
 **Next session:**
 Build analysis script. Produce training curve
 visualizations for both beauty contest and Jack
-of Hearts components. Begin paper outline.
+of Hearts components. Begin paper outline.  
+
+## Session 014 — 2026-06-06
+
+**What I built:**
+analysis/generate_figures.py — 5 publication figures:
+  - Fig1: Experiment comparison table (EXP001-007)
+  - Fig2: p-invariance plot (3 panels)
+  - Fig3: 2x2 architecture table
+  - Fig4: Jack of Hearts training curves
+  - Fig5: Jack of Hearts summary metrics
+All saved to docs/figures/
+
+train_full.py — EXP-JH004 full multi-agent training:
+  - 20 independent PPO networks (1 Jack 256x256,
+    19 regulars 128x128)
+  - 300k timesteps per network, Option A fixed budget
+  - 3 seeds (42, 7, 123)
+  - Metrics: wipe rate, cornered rate, concession rate,
+    Jack ID round, alliance survival (pair/group/loner)
+  - Both sides train from scratch
+
+**EXP-JH004 running:** 3 seeds, ~several hours.
+
+**Next session:**
+Analyze EXP-JH004 results. Compare alliance survival
+rates (pair vs group vs loner). Check whether pairs
+outperform groups as canonical game documents.
