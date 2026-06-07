@@ -507,3 +507,39 @@ train_full.py — EXP-JH004 full multi-agent training:
 Analyze EXP-JH004 results. Compare alliance survival
 rates (pair vs group vs loner). Check whether pairs
 outperform groups as canonical game documents.
+
+## Session 015 — 2026-06-06
+
+**What I built:**
+train_regulars.py — EXP-JH004b independent regular
+player training.
+
+Architecture:
+- Jack: fixed pre-trained policy (EXP-JH003, 256x256)
+- Regulars: 19 independent PPO networks, 128x128
+- 300k timesteps per network, trained sequentially
+- Other regulars sampled from current policies
+- None regulars fall back to random (early training)
+- 3 seeds (42, 7, 123)
+
+Rationale for Option C (fixed Jack):
+Jack has structural asymmetric advantages — knows own
+symbol via mirror, has manipulation mechanic, designed
+the game. Training regulars against a competent Jack
+reflects the actual game asymmetry accurately.
+
+Metrics: survival rate per agent, lobby wipe rate,
+Jack cornered rate, Jack ID round, alliance survival
+advantage (pair/group/loner).
+
+**EXP-JH004 (full simultaneous) abandoned:**
+Training loop architecture failed to connect game
+experience to PPO gradient updates — wipe rate stayed
+1.00 from step 5k with avg rounds 4.3, indicating
+regulars never learned to declare correctly.
+
+**EXP-JH004b running:** 3 seeds, sequential training.
+
+**Next session:**
+Analyze EXP-JH004b results. Key question: do pairs
+outperform groups and loners as canonical game documents?
