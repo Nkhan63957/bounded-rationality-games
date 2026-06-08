@@ -543,3 +543,90 @@ regulars never learned to declare correctly.
 **Next session:**
 Analyze EXP-JH004b results. Key question: do pairs
 outperform groups and loners as canonical game documents?
+
+## Session 015 — 2026-06-06/07
+
+**What I built:**
+train_regulars.py — EXP-JH004b: 19 independent regular
+PPO agents (128x128) trained sequentially against
+pre-trained Jack (EXP-JH003, 256x256).
+
+Architecture decisions:
+- Fixed pre-trained Jack (Option C): reflects actual
+  game asymmetry — Jack designed the game, knows own
+  symbol, has manipulation mechanic
+- Sequential training: each agent trains in own env,
+  other regulars sampled from current policies
+- 300k timesteps per agent, 200-round episode cap
+- Option A fixed budget: dead players contribute 0
+  reward for that episode
+- None-model fallback: untrained agents use random
+  actions during early sequential training
+
+**EXP-JH004 — Abandoned:**
+Attempted 20 simultaneous independent PPO networks
+with custom coordinated training loop. Failed because
+the loop couldn't connect game experience to SB3
+rollout buffers. Regular players never learned to
+declare correctly — wipe rate stayed 1.00 from step
+5k with avg rounds 4.3 throughout. Architectural
+lesson: simultaneous multi-agent training with 20
+independent SB3 PPO networks requires custom rollout
+buffer management not supported natively.
+
+**EXP-JH004b Results — Seed 42:**
+
+Training progression (consistent across all 19 agents):
+- Step 5,000:   Surv ~0.20, Rounds ~1.6, Reward ~-8.0
+- Step 25,000:  Surv ~0.80, Rounds ~35-50, Reward ~1-3
+- Step 50,000:  Surv ~0.95, Rounds ~85-93, Reward ~8.0
+- Step 300,000: Surv ~0.97, Rounds ~95-100, Reward ~9.4
+
+All 19 agents converged by step 40-50k. Plateau at
+0.96-0.98 survival represents irreducible Jack advantage.
+
+**EXP-JH004b Final Evaluation — Seed 42:**
+
+| Metric | Value |
+|---|---|
+| Lobby wipe rate | 0.02 |
+| Jack cornered rate | 0.00 |
+| Jack ID round | -1.0 |
+| Pair survival | 0.94 (n=197) |
+| Group survival | 1.00 (n=4) |
+| Loner survival | 0.14 (n=1,699) |
+
+**Primary Finding:**
+Alliance formation produces a 6.7x survival advantage
+over isolated play (0.94 pair vs 0.14 loner). Agents
+trained independently with no explicit cooperation
+instruction discovered that alliance formation is the
+dominant survival strategy — consistent with the
+canonical game's documented finding.
+
+Loner dominance in population (n=1,699 vs n=197 pairs)
+suggests alliance formation is difficult to achieve
+even when beneficial — a bounded rationality finding
+in itself. Agents fail to coordinate even when
+coordination is clearly advantageous, paralleling
+real human coordination failures in social dilemma
+literature.
+
+**Computational note:**
+Seeds 7 and 123 planned but not completed due to
+hardware failure mid-training. Seed 42 models saved
+(19 agents). Multi-seed confirmation pending — treat
+current results as preliminary pending robustness
+validation.
+
+**Jack vs regular player battery complete (seed 42).**
+
+**Build phase formally closed.**
+
+**Next steps:**
+- IAI²O quad chart (due June 28)
+- PULSE interview June 12
+- SAT prep ongoing
+- Multi-seed robustness (seeds 7, 123) when stable
+  hardware available — summer task
+- Paper writing begins October
